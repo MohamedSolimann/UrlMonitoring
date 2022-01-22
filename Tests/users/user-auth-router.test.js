@@ -3,16 +3,16 @@ const app = require("../../index");
 const request = supertest(app);
 const { createNewUser } = require("./index");
 
-describe("user authenticaion endpoints", () => {
+describe("user authentication endpoints", () => {
   it("user signin successful", async () => {
     let newUser = await createNewUser();
     const response = await request.post("/users/auth/signin").send({
       email: "a@a.com",
       password: "123123123",
     });
-    expect(response.headers["set-cookie"][0][6]).not.toBe(";");
     expect(response.status).toBe(200);
     expect(response.body.message).toBe("Success");
+    expect(response.headers["set-cookie"][0][6]).not.toBe(";");
   });
   it("user entered incorrect email", async () => {
     const response = await request.post("/users/auth/signin").send({

@@ -1,4 +1,5 @@
 {
+  "name": "default",
   "server": {
     "port": 8080
   },
