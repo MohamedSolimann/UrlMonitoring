@@ -1,0 +1,15 @@
+{
+  "server": {
+    "port": 8080
+  },
+  "DB": {
+    "host": "localhost",
+    "port": 27017,
+    "dbName": "bosta"
+  },
+  "twilio": {
+    "AccessToken": "87451ef0f20c9499114d0b6f6446dedd",
+    "AccountSid": "AC879de637148f47fd906515dc7fec760b"
+  },
+  "secret": "secret"
+}
