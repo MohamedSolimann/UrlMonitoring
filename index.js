@@ -5,12 +5,14 @@ const config = require("config");
 const cookieParser = require("cookie-parser");
 const userRouter = require("./Routes/user-router/user-restful");
 const userAuthRouter = require("./Routes/user-router/index");
+const checkRouter = require("./Routes/check-router/check-restful");
 
 //Routes
 app.use(express.json());
 app.use(cookieParser());
 app.use("/users", userRouter);
 app.use("/users/auth", userAuthRouter);
+app.use("/checks", checkRouter);
 mongoose.connect(
   `mongodb://${config.get("DB.host")}:${config.get("DB.port")}/${config.get(
     "DB.dbName"
