@@ -8,13 +8,20 @@ const {
   catchValidationErrors,
 } = require("../../validation/report.validation");
 const { userAuthentication } = require("../user-router/index");
-router.post(
-  "/",
-  userAuthentication,
-  reportValidation,
-  catchValidationErrors,
-  async (req, res) => {
-    const {
+router.post("/", reportValidation, catchValidationErrors, async (req, res) => {
+  const {
+    status,
+    availability,
+    uptime,
+    downtime,
+    responsetime,
+    history,
+    outages,
+    url,
+  } = req.body;
+  try {
+    let newReport = new reportModel({
+      _id: mongoose.Types.ObjectId(),
       status,
       availability,
       uptime,
@@ -23,26 +30,13 @@ router.post(
       history,
       outages,
       url,
-    } = req.body;
-    try {
-      let newReport = new reportModel({
-        _id: mongoose.Types.ObjectId(),
-        status,
-        availability,
-        uptime,
-        downtime,
-        responsetime,
-        history,
-        outages,
-        url,
-      });
-      await newReport.save();
-      res.status(201).json({ message: "Success", data: newReport });
-    } catch (error) {
-      res.status(500).json({ message: "Error", error });
-    }
+    });
+    await newReport.save();
+    res.status(201).json({ message: "Success", data: newReport });
+  } catch (error) {
+    res.status(500).json({ message: "Error", error });
   }
-);
+});
 router.get("/", userAuthentication, async (req, res) => {
   try {
     let reports = await reportModel.find({ deletedDate: null });
