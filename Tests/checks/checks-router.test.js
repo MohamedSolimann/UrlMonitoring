@@ -3,6 +3,9 @@ const app = require("../../index");
 const request = supertest(app);
 const mongoose = require("mongoose");
 const { createNewCheck, deleteCheck } = require("./index");
+const { setupDB } = require("../testDBSetup");
+
+setupDB();
 
 const createEndpointTestCases = () => {
   it("Suppose to create new check", async () => {

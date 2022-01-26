@@ -1,8 +1,9 @@
 const supertest = require("supertest");
 const app = require("../../index");
+const { setupDB } = require("../testDBSetup");
 const request = supertest(app);
 const { createNewUser } = require("./index");
-
+setupDB();
 describe("user authentication endpoints", () => {
   it("user signin successful", async () => {
     let newUser = await createNewUser();
@@ -23,6 +24,7 @@ describe("user authentication endpoints", () => {
     expect(response.body.message).toBe("Email is incorrect ,Please try again");
   });
   it("user entered incorrect password", async () => {
+    let newUser = await createNewUser();
     const response = await request.post("/users/auth/signin").send({
       email: "a@a.com",
       password: "incorrectpassword",

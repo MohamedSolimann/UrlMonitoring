@@ -3,6 +3,9 @@ const app = require("../../index");
 const request = supertest(app);
 const mongoose = require("mongoose");
 const { createNewReport, deleteReport } = require("./index");
+const { setupDB } = require("../testDBSetup");
+
+setupDB();
 
 const createEndpointTestCases = () => {
   it("Suppose to create new report", async () => {
@@ -130,5 +133,4 @@ const restApiTestCases = () => {
   udpateEndpointTestCases();
   deleteEndpointTestCases();
 };
-
 describe("Testing Restful API for users", restApiTestCases);
