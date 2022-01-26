@@ -32,9 +32,9 @@ module.exports = {
       await mongoose.connect(url, { useNewUrlParser: true });
     });
 
-    afterEach(async () => {
-      await removeAllCollections();
-    });
+    // afterEach(async () => {
+    //   await removeAllCollections();
+    // });
 
     afterAll(async () => {
       await dropAllCollections();
