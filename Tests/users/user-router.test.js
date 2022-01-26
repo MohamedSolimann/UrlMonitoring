@@ -127,7 +127,6 @@ const udpateEndpointTestCases = () => {
   });
   it("Suppose to get error not authorizied ", async () => {
     let newUser = await createNewUser();
-    let oldUsername = newUser.username;
     const response = await request
       .put(`/users/${newUser._id}`)
       .send({ username: "test name" });
