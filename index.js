@@ -3,12 +3,19 @@ const app = express();
 const mongoose = require("mongoose");
 const config = require("config");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 const userRouter = require("./Routes/user-router/user-restful");
-const userAuthRouter = require("./Routes/user-router/index");
+const userAuthRouter = require("./Routes/user-router/user-auth");
 const checkRouter = require("./Routes/check-router/check-restful");
 const reportRouter = require("./Routes/report-router/report-restful");
 
 //Routes
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use("/users", userRouter);
