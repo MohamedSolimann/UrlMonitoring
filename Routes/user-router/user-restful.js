@@ -8,24 +8,36 @@ const {
   signupValidation,
   catchValidationErrors,
 } = require("../../validation/user.validation");
+const sendEmail = require("../../verify/email-verification");
+const { userAuthentication } = require("../user-router/index");
 
 router.post("/", signupValidation, catchValidationErrors, async (req, res) => {
   const { username, email, password } = req.body;
   const encryptedPassword = bcrypt.hashSync(password, 8);
+  let OTP = Math.floor(Math.random() * 9000 + 1000);
   try {
     let newUser = new userModel({
       _id: mongoose.Types.ObjectId(),
       username,
       password: encryptedPassword,
       email,
+      verify: "Pending",
+      OTP,
     });
     await newUser.save();
+    // sendEmail({
+    //   to: email,
+    //   from: "msolimann671@gmail.com",
+    //   subject: "Email Verification",
+    //   text: "Email Verification",
+    //   html: "<body><p> Email Verification : {{OTP}}</p></body>",
+    // });
     res.status(201).json({ message: "Success", data: newUser });
   } catch (error) {
     res.status(500).json({ message: "Error", error });
   }
 });
-router.get("/", async (req, res) => {
+router.get("/", userAuthentication, async (req, res) => {
   try {
     let users = await userModel.find({ deletedDate: null });
     if (users.length !== 0) {
@@ -37,7 +49,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Error", error });
   }
 });
-router.get("/:id", async (req, res) => {
+router.get("/:id", userAuthentication, async (req, res) => {
   const userId = req.params.id;
   try {
     let user = await userModel.findOne({ _id: userId }).lean();
@@ -59,7 +71,7 @@ router.get("/:id", async (req, res) => {
     }
   }
 });
-router.put("/:id", async (req, res) => {
+router.put("/:id", userAuthentication, async (req, res) => {
   let userId = req.params.id;
   try {
     let user = await userModel.findOne({ _id: userId });
@@ -76,7 +88,7 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ message: "Error", error });
   }
 });
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", userAuthentication, async (req, res) => {
   let userId = req.params.id;
   try {
     let user = await userModel.findOne({ _id: userId });
