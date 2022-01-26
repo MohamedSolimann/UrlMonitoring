@@ -31,24 +31,9 @@ const createEndpointTestCases = () => {
     expect(response.body.data.history).toBe("2022-01-24T17:18:18.000Z");
   });
   it("Suppose to get availability validtaion error from create endpoint", async () => {
-    const response = await request.post("/checks").send({
+    const response = await request.post("/reports").send({
       status: 200,
       availability: "",
-      outages: 0,
-      downtime: 0,
-      uptime: 1,
-      responsetime: 1,
-      history:
-        "Mon Jan 24 2022 19:18:18 GMT+0200 (Eastern European Standard Time)",
-    });
-    expect(response.status).toBe(400);
-    expect(response.body.message).toBe("Invalid Info!");
-  });
-  it("Suppose to get availability validtaion error from create endpoint", async () => {
-    const response = await request.post("/checks").send({
-      url: "localhost:8080/",
-      status: 200,
-      availability: "100%",
       outages: 0,
       downtime: 0,
       uptime: 1,
@@ -63,6 +48,7 @@ const createEndpointTestCases = () => {
 const readEndpointTestCases = () => {
   it("Suppose to get report by id", async () => {
     let newReport = await createNewReport();
+    console.log(newReport);
     const response = await request.get(`/reports/${newReport._id}`);
     expect(response.status).toBe(200);
     expect(response.body.data.url).toBe("localhost:8080/");
@@ -133,4 +119,4 @@ const restApiTestCases = () => {
   udpateEndpointTestCases();
   deleteEndpointTestCases();
 };
-describe("Testing Restful API for users", restApiTestCases);
+describe("Testing Restful API for reports", restApiTestCases);
