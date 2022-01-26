@@ -2,25 +2,20 @@ const https = require("https");
 const http = require("http");
 const sendEmail = require("../../verify/email-verification");
 
-const options = {
-  hostname: "localhost",
-  port: 8080,
-  path: "/",
-  method: "GET",
-};
-const webhook = {
-  hostname: "localhost",
-  port: 8080,
-  path: "/webhook",
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
+const sendPostRequest = (url, reqbody) => {
+  const parseReqbody = JSON.stringify(reqbody);
+  const req = http.request(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  req.on("data", (d) => {});
+  req.on("error", (e) => {});
+  req.write(parseReqbody);
+  req.end();
 };
 let totalNumberOfReq = 0;
 let totalNumberOfSuccReq = 0;
 let totalNumberOfFailReq = 0;
-let history = [];
 let uptime = 0;
 let downtime = 0;
 let totalDowntime = 0;
@@ -34,63 +29,47 @@ let averageAvaiablilty,
   timeWhenResRecieved,
   status,
   reqStatus;
-setInterval(() => {
-  sendRequest(options);
-}, 6000);
-const sendRequestToWebhook = (options, reqbody) => {
-  let webhookBody = JSON.stringify(reqbody);
-  const req = http.request(options, (res) => {
-    res.on("data", (d) => {
-      console.log(res.statusCode);
-      console.log("requset sent on webhook");
-    });
-    res.on("error", (e) => {
-      // console.log("error");
-      req.end;
-    });
-  });
-  req.write(webhookBody);
-  req.end();
+let x;
+const URLMonitoring = (url, webhook) => {
+  setInterval(() => {
+    sendRequest(url, webhook);
+  }, 9000);
 };
-const sendRequest = (options) => {
+const sendRequest = (url, webhook) => {
   let timeout = true;
-  history.push(new Date());
-  const req = http.request(options, (res) => {
+  const req = http.request(url, (res) => {
     timeWhenReqSent = new Date();
     totalNumberOfReq++;
     status = res.statusCode;
-    console.log(status);
     if (status === 201 || status === 200) {
       totalNumberOfSuccReq++;
       if (reqStatus !== "success" || totalNumberOfSuccReq === 0) {
         upTimeDate = new Date();
         console.log("send email on up ");
-        //send email
-        //send http post req on webhook
-        sendRequestToWebhook(webhook, { Message: "Server is Up" });
-        sendEmail({
-          to: "masoliman28@gmail.com", // Change to your recipient
-          from: "testersendgrid97@gmail.com", // Change to your verified sender
-          subject: "Server is Up",
-          text: "Server is Up ,Please check it!",
-          html: "<body><p> Server is Up ,Please check it!</p></body>",
+        sendPostRequest(webhook, {
+          Message: "Server is Up",
         });
+        // sendEmail({
+        //   to: "masoliman28@gmail.com", // Change to your recipient
+        //   from: "testersendgrid97@gmail.com", // Change to your verified sender
+        //   subject: "Server is Up",
+        //   text: "Server is Up ,Please check it!",
+        //   html: "<body><p> Server is Up ,Please check it!</p></body>",
+        // });
       }
       reqStatus = "success";
     } else {
       totalNumberOfFailReq++;
       if (reqStatus !== "fail" || totalNumberOfFailReq === 0) {
         downTimeDate = new Date();
-        //send email
-        //send http post req on webhook
-        sendRequestToWebhook(webhook, { Message: "Server is Down" });
-        sendEmail({
-          to: "masoliman28@gmail.com", // Change to your recipient
-          from: "testersendgrid97@gmail.com", // Change to your verified sender
-          subject: "Server is Down",
-          text: "Server is Down ,Please check it!",
-          html: "<body><p> Server is Down ,Please check it!</p></body>",
-        });
+        sendPostRequest(webhook, { Message: "Server is Down" });
+        // sendEmail({
+        //   to: "masoliman28@gmail.com", // Change to your recipient
+        //   from: "testersendgrid97@gmail.com", // Change to your verified sender
+        //   subject: "Server is Down",
+        //   text: "Server is Down ,Please check it!",
+        //   html: "<body><p> Server is Down ,Please check it!</p></body>",
+        // });
         console.log("send email on down ");
       }
       reqStatus = "fail";
@@ -98,13 +77,8 @@ const sendRequest = (options) => {
     res.on("data", (d) => {
       timeout = false;
       timeWhenResRecieved = new Date();
-      console.log("status " + status);
-      console.log("total number of request " + totalNumberOfReq);
-      console.log("total number of succ request " + totalNumberOfSuccReq);
-      console.log("total number of failed request " + totalNumberOfFailReq);
       averageAvaiablilty =
         (totalNumberOfSuccReq / totalNumberOfReq) * 100 + "%";
-      console.log(averageAvaiablilty);
       if (reqStatus === "fail") {
         downtime =
           differenceBetweenDate(downTimeDate, new Date(), "seconds") +
@@ -116,11 +90,6 @@ const sendRequest = (options) => {
           differenceBetweenDate(upTimeDate, new Date(), "seconds") +
           totalUptime;
       }
-
-      console.log("downtime " + downTimeDate);
-      console.log("uptime " + upTimeDate);
-      console.log("request sent " + timeWhenReqSent);
-      console.log("reponse recieved " + timeWhenResRecieved);
       responseTime.push(
         differenceBetweenDate(
           timeWhenReqSent,
@@ -129,29 +98,23 @@ const sendRequest = (options) => {
         )
       );
       averageResponseTime = getAverage(responseTime);
-      console.log("uptime " + uptime);
-      console.log("downtime " + downtime);
-
-      console.log("response time " + responseTime);
       let record = {
+        url,
         status,
         availability: averageAvaiablilty,
         outages: totalNumberOfFailReq,
         downtime,
         uptime,
-        responseTime: averageResponseTime,
-        history,
+        responsetime: averageResponseTime,
+        history: new Date(),
       };
-      console.log(record);
+      sendPostRequest("http://localhost:8000/reports", record);
     });
   });
-  req.on("error", (e) => {
-    // console.log(e);
-  });
+  req.on("error", (e) => {});
   setTimeout(() => {
     if (timeout) {
-      status = undefined;
-      console.log("timeout");
+      status = 500;
       totalNumberOfReq++;
       totalNumberOfFailReq++;
       if (reqStatus !== "fail" || totalNumberOfFailReq === 0) {
@@ -160,15 +123,15 @@ const sendRequest = (options) => {
           differenceBetweenDate(downTimeDate, new Date(), "seconds") +
           totalDowntime;
         totalUptime = uptime;
-        sendEmail({
-          to: "masoliman28@gmail.com", // Change to your recipient
-          from: "testersendgrid97@gmail.com", // Change to your verified sender
-          subject: "Server is Down",
-          text: "Server is Down ,Please check it!",
-          html: "<body><p> Server is Down ,Please check it!</p></body>",
-        });
+        // sendEmail({
+        //   to: "masoliman28@gmail.com", // Change to your recipient
+        //   from: "testersendgrid97@gmail.com", // Change to your verified sender
+        //   subject: "Server is Down",
+        //   text: "Server is Down ,Please check it!",
+        //   html: "<body><p> Server is Down ,Please check it!</p></body>",
+        // });
         //send http post req on webhook
-        sendRequestToWebhook(webhook, { Message: "Server is Down" });
+        // sendRequestToWebhook(webhook, { Message: "Server is Down" });
         console.log("send email on down ");
       } else {
         downtime =
@@ -178,31 +141,24 @@ const sendRequest = (options) => {
       timeWhenResRecieved = new Date();
       responseTime.push(5);
       averageResponseTime = getAverage(responseTime);
-
       reqStatus = "fail";
       averageAvaiablilty =
         (totalNumberOfSuccReq / totalNumberOfReq) * 100 + "%";
       timeWhenResRecieved = "timeout";
-      console.log("reponse recieved time" + timeWhenResRecieved);
-      console.log(averageAvaiablilty);
-      console.log("status " + status);
-      console.log("total number of request " + totalNumberOfReq);
-      console.log("total number of succ request " + totalNumberOfSuccReq);
-      console.log("total number of failed request " + totalNumberOfFailReq);
-      console.log("response time " + responseTime);
-
       let record = {
+        url,
         status,
         availability: averageAvaiablilty,
         outages: totalNumberOfFailReq,
         downtime,
         uptime,
-        responseTime: averageResponseTime,
-        history,
+        responsetime: averageResponseTime,
+        history: new Date(),
       };
-      console.log(record);
+      sendPostRequest("http://localhost:8000/reports", record);
     }
-  }, 5000);
+  }, 8000);
+
   req.end();
 };
 const differenceBetweenDate = (startDate, endDate, type) => {
@@ -224,3 +180,5 @@ const getAverage = (arr) => {
   average = total / arr.length;
   return average;
 };
+// URLMonitoring("http://localhost:8080", "http://localhost:8080/webhook");
+module.exports = URLMonitoring;
