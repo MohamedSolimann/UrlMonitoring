@@ -4,22 +4,27 @@ const request = supertest(app);
 const mongoose = require("mongoose");
 const { createNewReport, deleteReport } = require("./index");
 const { setupDB } = require("../testDBSetup");
-
+const { userSignIn, createNewUser } = require("../users/index");
 setupDB();
 
 const createEndpointTestCases = () => {
   it("Suppose to create new report", async () => {
-    const response = await request.post("/reports").send({
-      url: "localhost:8080/",
-      status: 200,
-      availability: "100%",
-      outages: 0,
-      downtime: 0,
-      uptime: 1,
-      responsetime: 1,
-      history:
-        "Mon Jan 24 2022 19:18:18 GMT+0200 (Eastern European Standard Time)",
-    });
+    let newUser = await createNewUser();
+    let token = await userSignIn();
+    const response = await request
+      .post("/reports")
+      .send({
+        url: "localhost:8080/",
+        status: 200,
+        availability: "100%",
+        outages: 0,
+        downtime: 0,
+        uptime: 1,
+        responsetime: 1,
+        history:
+          "Mon Jan 24 2022 19:18:18 GMT+0200 (Eastern European Standard Time)",
+      })
+      .set("Cookie", token);
     expect(response.status).toBe(201);
     expect(response.body.data.url).toBe("localhost:8080/");
     expect(response.body.data.status).toBe(200);
@@ -31,25 +36,33 @@ const createEndpointTestCases = () => {
     expect(response.body.data.history).toBe("2022-01-24T17:18:18.000Z");
   });
   it("Suppose to get availability validtaion error from create endpoint", async () => {
-    const response = await request.post("/reports").send({
-      status: 200,
-      availability: "",
-      outages: 0,
-      downtime: 0,
-      uptime: 1,
-      responsetime: 1,
-      history:
-        "Mon Jan 24 2022 19:18:18 GMT+0200 (Eastern European Standard Time)",
-    });
+    let newUser = await createNewUser();
+    let token = await userSignIn();
+    const response = await request
+      .post("/reports")
+      .send({
+        status: 200,
+        availability: "",
+        outages: 0,
+        downtime: 0,
+        uptime: 1,
+        responsetime: 1,
+        history:
+          "Mon Jan 24 2022 19:18:18 GMT+0200 (Eastern European Standard Time)",
+      })
+      .set("Cookie", token);
     expect(response.status).toBe(400);
     expect(response.body.message).toBe("Invalid Info!");
   });
 };
 const readEndpointTestCases = () => {
   it("Suppose to get report by id", async () => {
+    let newUser = await createNewUser();
+    let token = await userSignIn();
     let newReport = await createNewReport();
-    console.log(newReport);
-    const response = await request.get(`/reports/${newReport._id}`);
+    const response = await request
+      .get(`/reports/${newReport._id}`)
+      .set("Cookie", token);
     expect(response.status).toBe(200);
     expect(response.body.data.url).toBe("localhost:8080/");
     expect(response.body.data.status).toBe(200);
@@ -61,21 +74,31 @@ const readEndpointTestCases = () => {
     expect(response.body.data.history).toBe("2022-01-24T17:18:18.000Z");
   });
   it("Suppose to get error invalid report id ", async () => {
+    let newUser = await createNewUser();
+    let token = await userSignIn();
     let reportId = "Invalid report id";
-    const response = await request.get(`/reports/${reportId}`);
+    const response = await request
+      .get(`/reports/${reportId}`)
+      .set("Cookie", token);
     expect(response.status).toBe(400);
     expect(response.body.message).toBe("Please check the report id");
   });
   it("Suppose to get error report no longer exists ", async () => {
+    let newUser = await createNewUser();
+    let token = await userSignIn();
     let newReport = await createNewReport();
-    await deleteReport(newReport._id);
-    const response = await request.get(`/reports/${newReport._id}`);
+    await deleteReport(newReport._id, token);
+    const response = await request
+      .get(`/reports/${newReport._id}`)
+      .set("Cookie", token);
     expect(response.status).toBe(400);
     expect(response.body.message).toBe("Report no longer exists!");
   });
   it("Suppose to get all reports ", async () => {
+    let newUser = await createNewUser();
+    let token = await userSignIn();
     let newReport = await createNewReport();
-    const response = await request.get("/reports");
+    const response = await request.get("/reports").set("Cookie", token);
     const responseData = response.body.data;
     expect(response.status).toBe(200);
     expect(responseData[responseData.length - 1].url).toBe("localhost:8080/");
@@ -93,11 +116,14 @@ const readEndpointTestCases = () => {
 };
 const udpateEndpointTestCases = () => {
   it("Suppose to update report ", async () => {
+    let newUser = await createNewUser();
+    let token = await userSignIn();
     let newReport = await createNewReport();
     let oldReportStatus = newReport.status;
     const response = await request
       .put(`/reports/${newReport._id}`)
-      .send({ status: 201 });
+      .send({ status: 201 })
+      .set("Cookie", token);
     let updatedStatus = response.body.data.status;
     expect(response.status).toBe(201);
     expect(oldReportStatus).not.toEqual(updatedStatus);
@@ -106,9 +132,13 @@ const udpateEndpointTestCases = () => {
 };
 const deleteEndpointTestCases = () => {
   it("Suppose to delete report ", async () => {
+    let newUser = await createNewUser();
+    let token = await userSignIn();
     let newReport = await createNewReport();
     let reportId = newReport._id;
-    let response = await request.delete(`/reports/${reportId}`);
+    let response = await request
+      .delete(`/reports/${reportId}`)
+      .set("Cookie", token);
     expect(response.status).toBe(202);
     expect(response.body.message).toBe("Success");
   });
