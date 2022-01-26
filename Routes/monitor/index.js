@@ -28,6 +28,9 @@ const sendPostRequest = (url, reqbody) => {
     headers: { "Content-Type": "application/json" },
   });
   req.write(parseReqbody);
+  req.on("error", (e) => {
+    console.log(e);
+  });
   req.end();
 };
 const getCheckStatus = (checkId, intervalReference, url, webhook) => {
@@ -58,7 +61,7 @@ const URLMonitoring = (url, webhook, checkId) => {
   }, 5000);
 };
 const monitor = (url, webhook) => {
-  const req = http.request(url, (res) => {
+  const req = http.request(url, { timeout: 4000 }, (res) => {
     timeWhenReqSent = new Date();
     totalNumberOfReq++;
     status = res.statusCode;
@@ -136,10 +139,32 @@ const monitor = (url, webhook) => {
       sendPostRequest("http://localhost:8000/reports", record);
     });
   });
-  req.on("error", (e) => {});
-  setTimeout(() => {
+  req.on("timeout", (t) => {
+    console.log("timeout");
     requestTimeout(url);
-  }, 4000);
+  });
+  req.on("error", (e) => {
+    console.log(e);
+    totalNumberOfFailReq++;
+    threshold++;
+    if (threshold >= 3) {
+      console.log("threshold do something ");
+      threshold = 0;
+    }
+    if (reqStatus !== "fail" || totalNumberOfFailReq === 0) {
+      downTimeDate = new Date();
+      sendPostRequest(webhook, { Message: "Server is Down" });
+      // sendEmail({
+      //   to: "masoliman28@gmail.com", // Change to your recipient
+      //   from: "testersendgrid97@gmail.com", // Change to your verified sender
+      //   subject: "Server is Down",
+      //   text: "Server is Down ,Please check it!",
+      //   html: "<body><p> Server is Down ,Please check it!</p></body>",
+      // });
+      console.log("send email on down ");
+    }
+    reqStatus = "fail";
+  });
 
   req.end();
 };
