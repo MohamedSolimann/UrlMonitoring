@@ -7,21 +7,14 @@ const {
   reportValidation,
   catchValidationErrors,
 } = require("../../validation/report.validation");
-
-router.post("/", reportValidation, catchValidationErrors, async (req, res) => {
-  const {
-    status,
-    availability,
-    uptime,
-    downtime,
-    responsetime,
-    history,
-    outages,
-    url,
-  } = req.body;
-  try {
-    let newReport = new reportModel({
-      _id: mongoose.Types.ObjectId(),
+const { userAuthentication } = require("../user-router/index");
+router.post(
+  "/",
+  userAuthentication,
+  reportValidation,
+  catchValidationErrors,
+  async (req, res) => {
+    const {
       status,
       availability,
       uptime,
@@ -30,14 +23,27 @@ router.post("/", reportValidation, catchValidationErrors, async (req, res) => {
       history,
       outages,
       url,
-    });
-    await newReport.save();
-    res.status(201).json({ message: "Success", data: newReport });
-  } catch (error) {
-    res.status(500).json({ message: "Error", error });
+    } = req.body;
+    try {
+      let newReport = new reportModel({
+        _id: mongoose.Types.ObjectId(),
+        status,
+        availability,
+        uptime,
+        downtime,
+        responsetime,
+        history,
+        outages,
+        url,
+      });
+      await newReport.save();
+      res.status(201).json({ message: "Success", data: newReport });
+    } catch (error) {
+      res.status(500).json({ message: "Error", error });
+    }
   }
-});
-router.get("/", async (req, res) => {
+);
+router.get("/", userAuthentication, async (req, res) => {
   try {
     let reports = await reportModel.find({ deletedDate: null });
     if (reports.length !== 0) {
@@ -49,7 +55,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Error", error });
   }
 });
-router.get("/:id", async (req, res) => {
+router.get("/:id", userAuthentication, async (req, res) => {
   const reportId = req.params.id;
   try {
     let report = await reportModel.findOne({ _id: reportId }).lean();
@@ -70,7 +76,7 @@ router.get("/:id", async (req, res) => {
     }
   }
 });
-router.put("/:id", async (req, res) => {
+router.put("/:id", userAuthentication, async (req, res) => {
   let reportId = req.params.id;
   try {
     let report = await reportModel.findOne({ _id: reportId });
@@ -87,7 +93,7 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ message: "Error", error });
   }
 });
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", userAuthentication, async (req, res) => {
   let reportId = req.params.id;
   try {
     let report = await reportModel.findOne({ _id: reportId });
