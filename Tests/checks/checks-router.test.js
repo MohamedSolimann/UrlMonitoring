@@ -40,7 +40,6 @@ const createEndpointTestCases = () => {
   it("Suppose to get checkname validtaion error from create endpoint", async () => {
     let newUser = await createNewUser();
     let token = await userSignIn();
-    console.log(token);
     const response = await request
       .post("/checks")
       .send({
@@ -120,7 +119,7 @@ const createEndpointTestCases = () => {
       })
       .set("Cookie", token);
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe("port must be a number");
+    expect(response.body.message).toBe("Invalid Info!");
   });
   it("Suppose to get status validtaion error from create endpoint", async () => {
     let newUser = await createNewUser();
@@ -195,7 +194,7 @@ const readEndpointTestCases = () => {
     let newUser = await createNewUser();
     let token = await userSignIn();
     let newCheck = await createNewCheck();
-    await deleteCheck(newCheck._id);
+    await deleteCheck(newCheck._id, token);
     const response = await request
       .get(`/checks/${newCheck._id}`)
       .set("Cookie", token);
@@ -226,7 +225,7 @@ const readEndpointTestCases = () => {
   it("Suppose to get authorization error", async () => {
     let newUser = await createNewUser();
     let newCheck = await createNewCheck();
-    const response = await request.get(`/checks/${newcheck._id}`);
+    const response = await request.get(`/checks/${newCheck._id}`);
     expect(response.status).toBe(401);
     expect(response.body.message).toBe("User not authorizied");
   });
