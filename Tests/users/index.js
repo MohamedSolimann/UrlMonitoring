@@ -10,8 +10,14 @@ async function createNewUser() {
   });
   return response.body.data;
 }
-async function deleteUser(userId) {
-  const reponse = await request.delete(`/users/${userId}`);
+async function userSignIn() {
+  const response = await request.post("/users/auth/signin").send({
+    email: "a@a.com",
+    password: "123123123",
+  });
+  return response.headers["set-cookie"][0];
 }
-
-module.exports = { createNewUser, deleteUser };
+async function deleteUser(userId, token) {
+  const reponse = await request.delete(`/users/${userId}`).set("Cookie", token);
+}
+module.exports = { createNewUser, deleteUser, userSignIn };
