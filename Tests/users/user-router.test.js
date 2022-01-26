@@ -131,7 +131,6 @@ const udpateEndpointTestCases = () => {
     const response = await request
       .put(`/users/${newUser._id}`)
       .send({ username: "test name" });
-    let updatedUsername = response.body.data.username;
     expect(response.status).toBe(401);
     expect(response.body.message).toEqual("User not authorizied");
   });
