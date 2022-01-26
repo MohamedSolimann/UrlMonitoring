@@ -21,6 +21,14 @@ var userSchema = new mongoose.Schema({
   deletedDate: {
     type: Date,
   },
+  verify: {
+    type: String,
+    enum: ["Pending", "Active"],
+    required: true,
+  },
+  OTP: {
+    type: Number,
+  },
 });
 
 //Export the model
