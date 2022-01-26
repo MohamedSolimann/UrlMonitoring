@@ -7,23 +7,16 @@ const {
   checkCreation,
   catchValidationErrors,
 } = require("../../validation/check.validation");
+const { userAuthentication } = require("../user-router/index");
+const URLMonitoring = require("../monitor/index");
 
-router.post("/", checkCreation, catchValidationErrors, async (req, res) => {
-  const {
-    checkname,
-    url,
-    protocol,
-    path,
-    port,
-    webhook,
-    tag,
-    status,
-    user_id,
-  } = req.body;
-  try {
-    let newCheck = new checkModel({
-      _id: mongoose.Types.ObjectId(),
-      user_id,
+router.post(
+  "/",
+  userAuthentication,
+  checkCreation,
+  catchValidationErrors,
+  async (req, res) => {
+    const {
       checkname,
       url,
       protocol,
@@ -32,18 +25,34 @@ router.post("/", checkCreation, catchValidationErrors, async (req, res) => {
       webhook,
       tag,
       status,
-    });
-    await newCheck.save();
-    res.status(201).json({ message: "Success", data: newCheck });
-  } catch (error) {
-    if (error.message) {
-      res.status(400).json({ message: "port must be a number" });
-    } else {
-      res.status(500).json({ message: "Error", error });
+      user_id,
+    } = req.body;
+    try {
+      let newCheck = new checkModel({
+        _id: mongoose.Types.ObjectId(),
+        user_id,
+        checkname,
+        url,
+        protocol,
+        path,
+        port,
+        webhook,
+        tag,
+        status,
+      });
+      await newCheck.save();
+      URLMonitoring(url, webhook, newCheck._id);
+      res.status(201).json({ message: "Success", data: newCheck });
+    } catch (error) {
+      if (error.message) {
+        res.status(400).json({ message: "Invalid Info!" });
+      } else {
+        res.status(500).json({ message: "Error", error });
+      }
     }
   }
-});
-router.get("/", async (req, res) => {
+);
+router.get("/", userAuthentication, async (req, res) => {
   try {
     let checks = await checkModel.find({ deletedDate: null });
     if (checks.length !== 0) {
@@ -76,7 +85,7 @@ router.get("/:id", async (req, res) => {
     }
   }
 });
-router.put("/:id", async (req, res) => {
+router.put("/:id", userAuthentication, async (req, res) => {
   let checkId = req.params.id;
   try {
     let check = await checkModel.findOne({ _id: checkId });
@@ -93,14 +102,14 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ message: "Error", error });
   }
 });
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", userAuthentication, async (req, res) => {
   let checkId = req.params.id;
   try {
     let check = await checkModel.findOne({ _id: checkId });
     if (check) {
       let deletedCheck = await checkModel.findOneAndUpdate(
         { _id: checkId },
-        { $set: { deletedDate: Date() } }
+        { $set: { deletedDate: Date(), status: "Paused" } }
       );
     }
     res.status(202).json({ message: "Success" });
