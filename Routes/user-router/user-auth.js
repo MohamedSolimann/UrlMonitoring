@@ -16,16 +16,20 @@ router.post(
     const { email, password } = req.body;
     try {
       let user = await userModel.findOne({ email });
-      if (user) {
-        let verifyPassword = bycrypt.compareSync(password, user.password);
-        if (verifyPassword) {
-          const token = jwt.sign({ id: user._id }, "secret");
-          res.cookie("Token", token);
-          res.status(200).json({ message: "Success" });
+      if (user.verify === "Active") {
+        if (user.verify === "Active") {
+          let verifyPassword = bycrypt.compareSync(password, user.password);
+          if (verifyPassword) {
+            const token = jwt.sign({ id: user._id }, "secret");
+            res.cookie("Token", token);
+            res.status(200).json({ message: "Success" });
+          } else {
+            res
+              .status(400)
+              .json({ message: "Password is incorrect ,Please try again" });
+          }
         } else {
-          res
-            .status(400)
-            .json({ message: "Password is incorrect ,Please try again" });
+          res.status(200).json({ message: "Please verify your email" });
         }
       } else {
         res
