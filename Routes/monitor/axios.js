@@ -1,6 +1,7 @@
 const axios = require("axios");
 const { createReport } = require("../report-router/index");
 const { getCheckStatus } = require("../check-router/index");
+const sendEmail = require("../../verify/email-verification");
 let totalNumberOfReq = 0;
 let totalNumberOfSuccReq = 0;
 let totalNumberOfFailReq = 0;
@@ -63,13 +64,13 @@ const requestSuccess = (url, webhook) => {
     upTimeDate = new Date();
     console.log("send email on up ");
     sendPostRequset(webhook, { Message: "Server is up" });
-    // sendEmail({
-    //   to: "masoliman28@gmail.com", // Change to your recipient
-    //   from: "testersendgrid97@gmail.com", // Change to your verified sender
-    //   subject: "Server is Up",
-    //   text: "Server is Up ,Please check it!",
-    //   html: "<body><p> Server is Up ,Please check it!</p></body>",
-    // });
+    sendEmail({
+      to: "masoliman28@gmail.com", // Change to your recipient
+      from: "ahmdsolmn@gmail.com", // Change to your verified sender
+      subject: "Server is Up",
+      text: "Server is Up ,Please check it!",
+      html: "<body><p> Server is Up ,Please check it!</p></body>",
+    });
   } else {
     totalDowntime = downtime;
     uptime =
@@ -99,14 +100,13 @@ const requestFailed = (url, webhook) => {
   }
   if (reqStatus !== "fail" || totalNumberOfFailReq === 0) {
     downTimeDate = new Date();
-    // sendPostRequest(webhook, { Message: "Server is Down" });
-    // sendEmail({
-    //   to: "masoliman28@gmail.com", // Change to your recipient
-    //   from: "testersendgrid97@gmail.com", // Change to your verified sender
-    //   subject: "Server is Down",
-    //   text: "Server is Down ,Please check it!",
-    //   html: "<body><p> Server is Down ,Please check it!</p></body>",
-    // });
+    sendEmail({
+      to: "masoliman28@gmail.com", // Change to your recipient
+      from: "ahmdsolmn@gmail.com", // Change to your verified sender
+      subject: "Server is Down",
+      text: "Server is Down ,Please check it!",
+      html: "<body><p> Server is Down ,Please check it!</p></body>",
+    });
     sendPostRequset(webhook, { Message: "Server is down" });
     console.log("send email on down ");
   } else {
