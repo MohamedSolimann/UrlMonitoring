@@ -14,16 +14,17 @@ async function createReport(
   try {
     let newReport = new reportModel({
       _id: mongoose.Types.ObjectId(),
-      url,
-      status,
-      availability,
-      outages,
-      downtime,
-      uptime,
-      responsetime,
-      history,
+      url: url,
+      status: status,
+      availability: availability,
+      outages: outages,
+      downtime: downtime,
+      uptime: uptime,
+      responsetime: responsetime,
+      history: history,
     });
     await newReport.save();
+    console.log("report created ");
   } catch (error) {
     console.log("error");
   }
