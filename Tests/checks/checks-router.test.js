@@ -1,5 +1,6 @@
 const supertest = require("supertest");
 const app = require("../../index");
+
 const request = supertest(app);
 const mongoose = require("mongoose");
 const { createNewCheck, deleteCheck } = require("./index");
@@ -11,6 +12,7 @@ setupDB();
 const createEndpointTestCases = () => {
   it("Suppose to create new check", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     const response = await request
       .post("/checks")
@@ -39,6 +41,7 @@ const createEndpointTestCases = () => {
   });
   it("Suppose to get checkname validtaion error from create endpoint", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     const response = await request
       .post("/checks")
@@ -60,6 +63,7 @@ const createEndpointTestCases = () => {
   });
   it("Suppose to get url validtaion error from create endpoint", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     const response = await request
       .post("/checks")
@@ -81,6 +85,7 @@ const createEndpointTestCases = () => {
   });
   it("Suppose to get protocol validtaion error from create endpoint", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     const response = await request
       .post("/checks")
@@ -102,6 +107,7 @@ const createEndpointTestCases = () => {
   });
   it("Suppose to get port validtaion error from create endpoint", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     const response = await request
       .post("/checks")
@@ -123,6 +129,7 @@ const createEndpointTestCases = () => {
   });
   it("Suppose to get status validtaion error from create endpoint", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     const response = await request
       .post("/checks")
@@ -163,6 +170,7 @@ const createEndpointTestCases = () => {
 const readEndpointTestCases = () => {
   it("Suppose to get check by id", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let newcheck = await createNewCheck();
     const response = await request
@@ -182,6 +190,7 @@ const readEndpointTestCases = () => {
   });
   it("Suppose to get error invalid check id ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let checkId = "Invalid check id";
     const response = await request
@@ -192,6 +201,7 @@ const readEndpointTestCases = () => {
   });
   it("Suppose to get error check no longer exists ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let newCheck = await createNewCheck();
     await deleteCheck(newCheck._id, token);
@@ -203,6 +213,7 @@ const readEndpointTestCases = () => {
   });
   it("Suppose to get all checks ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let newCheck = await createNewCheck();
     const response = await request.get("/checks").set("Cookie", token);
@@ -233,6 +244,7 @@ const readEndpointTestCases = () => {
 const udpateEndpointTestCases = () => {
   it("Suppose to update check ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let newCheck = await createNewCheck();
     let oldCheckname = newCheck.checkname;
@@ -258,6 +270,7 @@ const udpateEndpointTestCases = () => {
 const deleteEndpointTestCases = () => {
   it("Suppose to delete check ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let newCheck = await createNewCheck();
     let checkId = newCheck._id;

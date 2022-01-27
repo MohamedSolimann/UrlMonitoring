@@ -2,7 +2,12 @@ const supertest = require("supertest");
 const app = require("../../index");
 const request = supertest(app);
 const mongoose = require("mongoose");
-const { createNewUser, deleteUser, userSignIn } = require("./index");
+const {
+  createNewUser,
+  deleteUser,
+  userSignIn,
+  verifyUser,
+} = require("./index");
 const { setupDB } = require("../testDBSetup");
 
 setupDB();
@@ -69,6 +74,8 @@ const createEndpointTestCases = () => {
 const readEndpointTestCases = () => {
   it("Suppose to get user by id", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     const response = await request
       .get(`/users/${newUser._id}`)
@@ -80,6 +87,7 @@ const readEndpointTestCases = () => {
   });
   it("Suppose to get error invalid user id ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let userId = "Invalid user id";
     const response = await request.get(`/users/${userId}`).set("Cookie", token);
@@ -88,6 +96,7 @@ const readEndpointTestCases = () => {
   });
   it("Suppose to get error user no longer exists ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     await deleteUser(newUser._id, token);
     const response = await request
@@ -105,6 +114,7 @@ const readEndpointTestCases = () => {
   });
   it("Suppose to get all users ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     const response = await request.get("/users").set("Cookie", token);
     expect(response.status).toBe(200);
@@ -114,6 +124,7 @@ const readEndpointTestCases = () => {
 const udpateEndpointTestCases = () => {
   it("Suppose to update user ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let oldUsername = newUser.username;
     const response = await request
@@ -137,6 +148,7 @@ const udpateEndpointTestCases = () => {
 const deleteEndpointTestCases = () => {
   it("Suppose to delete user ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let userId = newUser._id;
     let response = await request
