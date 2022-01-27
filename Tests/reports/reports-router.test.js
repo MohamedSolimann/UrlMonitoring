@@ -7,57 +7,10 @@ const { setupDB } = require("../testDBSetup");
 const { userSignIn, createNewUser } = require("../users/index");
 setupDB();
 
-const createEndpointTestCases = () => {
-  it("Suppose to create new report", async () => {
-    let newUser = await createNewUser();
-    let token = await userSignIn();
-    const response = await request
-      .post("/reports")
-      .send({
-        url: "localhost:8080/",
-        status: 200,
-        availability: "100%",
-        outages: 0,
-        downtime: 0,
-        uptime: 1,
-        responsetime: 1,
-        history:
-          "Mon Jan 24 2022 19:18:18 GMT+0200 (Eastern European Standard Time)",
-      })
-      .set("Cookie", token);
-    expect(response.status).toBe(201);
-    expect(response.body.data.url).toBe("localhost:8080/");
-    expect(response.body.data.status).toBe(200);
-    expect(response.body.data.availability).toBe("100%");
-    expect(response.body.data.outages).toBe(0);
-    expect(response.body.data.downtime).toBe(0);
-    expect(response.body.data.uptime).toBe(1);
-    expect(response.body.data.responsetime).toBe(1);
-    expect(response.body.data.history).toBe("2022-01-24T17:18:18.000Z");
-  });
-  it("Suppose to get availability validtaion error from create endpoint", async () => {
-    let newUser = await createNewUser();
-    let token = await userSignIn();
-    const response = await request
-      .post("/reports")
-      .send({
-        status: 200,
-        availability: "",
-        outages: 0,
-        downtime: 0,
-        uptime: 1,
-        responsetime: 1,
-        history:
-          "Mon Jan 24 2022 19:18:18 GMT+0200 (Eastern European Standard Time)",
-      })
-      .set("Cookie", token);
-    expect(response.status).toBe(400);
-    expect(response.body.message).toBe("Invalid Info!");
-  });
-};
 const readEndpointTestCases = () => {
   it("Suppose to get report by id", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let newReport = await createNewReport();
     const response = await request
@@ -75,6 +28,7 @@ const readEndpointTestCases = () => {
   });
   it("Suppose to get error invalid report id ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let reportId = "Invalid report id";
     const response = await request
@@ -85,6 +39,7 @@ const readEndpointTestCases = () => {
   });
   it("Suppose to get error report no longer exists ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let newReport = await createNewReport();
     await deleteReport(newReport._id, token);
@@ -96,6 +51,7 @@ const readEndpointTestCases = () => {
   });
   it("Suppose to get all reports ", async () => {
     let newUser = await createNewUser();
+    let verified = await verifyUser();
     let token = await userSignIn();
     let newReport = await createNewReport();
     const response = await request.get("/reports").set("Cookie", token);
@@ -114,39 +70,8 @@ const readEndpointTestCases = () => {
     );
   });
 };
-const udpateEndpointTestCases = () => {
-  it("Suppose to update report ", async () => {
-    let newUser = await createNewUser();
-    let token = await userSignIn();
-    let newReport = await createNewReport();
-    let oldReportStatus = newReport.status;
-    const response = await request
-      .put(`/reports/${newReport._id}`)
-      .send({ status: 201 })
-      .set("Cookie", token);
-    let updatedStatus = response.body.data.status;
-    expect(response.status).toBe(201);
-    expect(oldReportStatus).not.toEqual(updatedStatus);
-    expect(response.body.data.status).toEqual(201);
-  });
-};
-const deleteEndpointTestCases = () => {
-  it("Suppose to delete report ", async () => {
-    let newUser = await createNewUser();
-    let token = await userSignIn();
-    let newReport = await createNewReport();
-    let reportId = newReport._id;
-    let response = await request
-      .delete(`/reports/${reportId}`)
-      .set("Cookie", token);
-    expect(response.status).toBe(202);
-    expect(response.body.message).toBe("Success");
-  });
-};
+
 const restApiTestCases = () => {
-  createEndpointTestCases();
   readEndpointTestCases();
-  udpateEndpointTestCases();
-  deleteEndpointTestCases();
 };
 describe("Testing Restful API for reports", restApiTestCases);
