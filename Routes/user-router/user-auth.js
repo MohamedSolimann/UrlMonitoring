@@ -16,7 +16,7 @@ router.post(
     const { email, password } = req.body;
     try {
       let user = await userModel.findOne({ email });
-      if (user.verify === "Active") {
+      if (user) {
         if (user.verify === "Active") {
           let verifyPassword = bycrypt.compareSync(password, user.password);
           if (verifyPassword) {
@@ -70,18 +70,6 @@ router.post("/verify/:id", async (req, res) => {
     } else {
       res.status(500).json({ message: "Error", error });
     }
-  }
-});
-router.get("/userauth", async (req, res) => {
-  try {
-    let token = req.cookies["Token"];
-    if (token) {
-      res.status(200).json({ message: "Success" });
-    } else {
-      res.status(401).json({ message: "User not authorizied" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Error" });
   }
 });
 router.get("/signout", async (req, res) => {
