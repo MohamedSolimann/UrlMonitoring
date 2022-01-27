@@ -37,8 +37,9 @@ router.post(
     }
   }
 );
-router.post("/verify", async (req, res) => {
-  const { OTP, userId } = req.body;
+router.post("/verify/:id", async (req, res) => {
+  const { OTP } = req.body;
+  const userId = req.params.id;
   try {
     let user = await userModel.findOne({ _id: userId }).lean();
     if (user) {

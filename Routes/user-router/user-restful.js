@@ -25,13 +25,13 @@ router.post("/", signupValidation, catchValidationErrors, async (req, res) => {
       OTP,
     });
     await newUser.save();
-    // sendEmail({
-    //   to: email,
-    //   from: "msolimann671@gmail.com",
-    //   subject: "Email Verification",
-    //   text: "Email Verification",
-    //   html: "<body><p> Email Verification : {{OTP}}</p></body>",
-    // });
+    sendEmail({
+      to: email,
+      from: "ahmdsolmn@gmail.com",
+      subject: "Email Verification",
+      text: "Email Verification",
+      html: `<body><p> Email Verification : ${OTP}</p></body>`,
+    });
     res.status(201).json({ message: "Success", data: newUser });
   } catch (error) {
     res.status(500).json({ message: "Error", error });
