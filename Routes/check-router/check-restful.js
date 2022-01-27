@@ -8,7 +8,7 @@ const {
   catchValidationErrors,
 } = require("../../validation/check.validation");
 const { userAuthentication } = require("../user-router/index");
-const URLMonitoring = require("../monitor/index");
+const URLMonitoring = require("../monitor/axios");
 
 router.post(
   "/",
