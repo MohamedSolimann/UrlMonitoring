@@ -18,21 +18,21 @@ let downTimeDate,
   timeWhenResRecieved,
   reqStatus,
   averageAvaiablilty;
-const URLMonitoring = (url, webhook, checkId) => {
+const URLMonitoring = (url, webhook, checkId, interval, timeout) => {
   let monitoring = setInterval(async () => {
     const checkStatus = await getCheckStatus(checkId);
     if (checkStatus === "Active") {
-      monitor(url, webhook);
+      monitor(url, webhook, timeout);
     } else {
       clearInterval(monitoring);
     }
-  }, 5000);
+  }, interval);
 };
-const monitor = (url, webhook) => {
+const monitor = (url, webhook, timeout) => {
   timeWhenReqSent = new Date();
   totalNumberOfReq++;
   axios
-    .get(url, { timeout: 3000 })
+    .get(url, { timeout: timeout })
     .then((res) => {
       //succ request
       requestSuccess(url, webhook);

@@ -25,6 +25,8 @@ router.post(
       webhook,
       tag,
       status,
+      timeout,
+      interval,
       user_id,
     } = req.body;
     try {
@@ -39,9 +41,11 @@ router.post(
         webhook,
         tag,
         status,
+        timeout,
+        interval,
       });
       await newCheck.save();
-      URLMonitoring(url, webhook, newCheck._id);
+      URLMonitoring(url, webhook, newCheck._id, interval, timeout);
       res.status(201).json({ message: "Success", data: newCheck });
     } catch (error) {
       if (error.message) {

@@ -34,6 +34,12 @@ var checkSchema = new mongoose.Schema({
   webhook: {
     type: String,
   },
+  timeout: {
+    type: Number,
+  },
+  interval: {
+    type: Number,
+  },
   status: {
     type: String,
     required: true,

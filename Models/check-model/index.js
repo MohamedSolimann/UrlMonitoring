@@ -21,6 +21,12 @@ function updateRequestBody(req) {
   if (req.body.status) {
     updatedBody.status = req.body.status;
   }
+  if (req.body.timeout) {
+    updatedBody.timeout = req.body.timeout;
+  }
+  if (req.body.interval) {
+    updatedBody.interval = req.body.interval;
+  }
   return updatedBody;
 }
 
