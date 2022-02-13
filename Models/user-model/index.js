@@ -56,16 +56,35 @@ async function getUserById(userId) {
     throw error;
   }
 }
-function updateRequestBody(req) {
+async function updateUserById(userId, body) {
+  try {
+    let user = await getUserById(userId);
+    let udpatedRequestBody = updateRequestBody(body);
+    let updatedUser = await userModel.findOneAndUpdate(
+      { _id: userId },
+      { $set: udpatedRequestBody },
+      { new: true }
+    );
+    if (updatedUser) {
+      return updatedUser;
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+function updateRequestBody(body) {
   let updatedBody = {};
-  if (req.body.username) {
-    updatedBody.username = req.body.username;
+  if (body.username) {
+    updatedBody.username = body.username;
   }
-  if (req.body.password) {
-    updatedBody.password = req.body.password;
+  if (body.password) {
+    updatedBody.password = body.password;
   }
-  if (req.body.email) {
-    updatedBody.email = req.body.email;
+  if (body.email) {
+    updatedBody.email = body.email;
+  }
+  if (body.verify) {
+    updatedBody.verify = body.verify;
   }
   return updatedBody;
 }
@@ -76,4 +95,5 @@ module.exports = {
   getUserByEmail,
   getUsers,
   getUserById,
+  updateUserById,
 };

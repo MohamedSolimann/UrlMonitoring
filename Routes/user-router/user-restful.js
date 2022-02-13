@@ -5,8 +5,8 @@ const {
   getUserByEmail,
   getUsers,
   getUserById,
+  updateUserById,
 } = require("../../Models/user-model/index");
-const { updateRequestBody } = require("../../Models/user-model/index");
 const {
   signupValidation,
   catchValidationErrors,
@@ -30,7 +30,7 @@ router.get("/", userAuthentication, async (req, res) => {
     res.status(500).json({ message: "Error", error: error.message });
   }
 });
-router.get("/:id", async (req, res) => {
+router.get("/:id", userAuthentication, async (req, res) => {
   try {
     let user = await getUserById(req.params.id);
     if (user) {
@@ -47,21 +47,18 @@ router.get("/:id", async (req, res) => {
     }
   }
 });
-router.put("/:id", userAuthentication, async (req, res) => {
-  let userId = req.params.id;
+router.put("/:id", async (req, res) => {
   try {
-    let user = await userModel.findOne({ _id: userId });
-    if (user) {
-      let updatedBody = await updateRequestBody(req);
-      var updatedUser = await userModel.findOneAndUpdate(
-        { _id: user._id },
-        { $set: updatedBody },
-        { new: true }
-      );
-    }
+    const updatedUser = await updateUserById(req.params.id, req.body);
     res.status(201).json({ message: "Success", data: updatedUser });
   } catch (error) {
-    res.status(500).json({ message: "Error", error });
+    if (error.kind === "ObjectId") {
+      res.status(400).json({ message: "Please check the user id" });
+    } else if (error.message) {
+      res.status(400).json({ message: "Error", error: error.message });
+    } else {
+      res.status(500).json({ message: "Error", error });
+    }
   }
 });
 router.delete("/:id", userAuthentication, async (req, res) => {
