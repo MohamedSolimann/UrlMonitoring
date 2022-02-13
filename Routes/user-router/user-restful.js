@@ -6,6 +6,7 @@ const {
   getUsers,
   getUserById,
   updateUserById,
+  deleteUserById,
 } = require("../../Models/user-model/index");
 const {
   signupValidation,
@@ -47,7 +48,7 @@ router.get("/:id", userAuthentication, async (req, res) => {
     }
   }
 });
-router.put("/:id", async (req, res) => {
+router.put("/:id", userAuthentication, async (req, res) => {
   try {
     const updatedUser = await updateUserById(req.params.id, req.body);
     res.status(201).json({ message: "Success", data: updatedUser });
@@ -62,18 +63,17 @@ router.put("/:id", async (req, res) => {
   }
 });
 router.delete("/:id", userAuthentication, async (req, res) => {
-  let userId = req.params.id;
   try {
-    let user = await userModel.findOne({ _id: userId });
-    if (user) {
-      let deletedUser = await userModel.findOneAndUpdate(
-        { _id: userId },
-        { $set: { deletedDate: Date() } }
-      );
-    }
+    let deletedUser = await deleteUserById(req.params.id);
     res.status(202).json({ message: "Success" });
   } catch (error) {
-    res.status(500).json({ message: "Error" });
+    if (error.kind === "ObjectId") {
+      res.status(400).json({ message: "Please check the user id" });
+    } else if (error.message) {
+      res.status(400).json({ message: "Error", error: error.message });
+    } else {
+      res.status(500).json({ message: "Error", error });
+    }
   }
 });
 

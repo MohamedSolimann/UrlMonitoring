@@ -18,7 +18,7 @@ var userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  deletedDate: {
+  deletedAt: {
     type: Date,
   },
   verify: {

@@ -37,7 +37,7 @@ function updateUserForCreation(user) {
   return user;
 }
 async function getUsers() {
-  const users = await userModel.find({ deletedDate: null }).lean();
+  const users = await userModel.find({ deletedAt: null }).lean();
   if (users) {
     return users;
   } else {
@@ -72,6 +72,21 @@ async function updateUserById(userId, body) {
     throw error;
   }
 }
+async function deleteUserById(userId) {
+  try {
+    let user = await getUserById(userId);
+    let deleteUser = await userModel.findOneAndUpdate(
+      { _id: userId },
+      { $set: { deletedAt: Date() } },
+      { new: true }
+    );
+    if (deleteUser) {
+      return deleteUser;
+    }
+  } catch (error) {
+    throw error;
+  }
+}
 function updateRequestBody(body) {
   let updatedBody = {};
   if (body.username) {
@@ -96,4 +111,5 @@ module.exports = {
   getUsers,
   getUserById,
   updateUserById,
+  deleteUserById,
 };
