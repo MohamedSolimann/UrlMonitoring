@@ -1,40 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const userModel = require("../../Models/user-model/user.schema");
+const { createUser, getUserByEmail } = require("../../Models/user-model/index");
 const { updateRequestBody } = require("../../Models/user-model/index");
 const {
   signupValidation,
   catchValidationErrors,
 } = require("../../validation/user.validation");
-const sendEmail = require("../../verify/email-verification");
 const { userAuthentication } = require("../user-router/index");
 
 router.post("/", signupValidation, catchValidationErrors, async (req, res) => {
-  const { username, email, password } = req.body;
-  const encryptedPassword = bcrypt.hashSync(password, 8);
-  let OTP = Math.floor(Math.random() * 9000 + 1000);
   try {
-    let newUser = new userModel({
-      _id: mongoose.Types.ObjectId(),
-      username,
-      password: encryptedPassword,
-      email,
-      verify: "Pending",
-      OTP,
-    });
-    await newUser.save();
-    sendEmail({
-      to: email,
-      from: "ahmdsolmn@gmail.com",
-      subject: "Email Verification",
-      text: "Email Verification",
-      html: `<body><p> Email Verification : ${OTP}</p></body>`,
-    });
+    await getUserByEmail(req.body.email);
+    const newUser = createUser(req.body);
     res.status(201).json({ message: "Success", data: newUser });
   } catch (error) {
-    res.status(500).json({ message: "Error", error });
+    res.status(500).json({ message: "Error", error: error.message });
   }
 });
 router.get("/", userAuthentication, async (req, res) => {
