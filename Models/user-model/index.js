@@ -121,6 +121,15 @@ async function userAuthentication(email, password) {
     throw new Error("Email is not associated with any account");
   }
 }
+async function userEmailVerification(userId, OTP) {
+  const user = await getUserById({ _id: userId });
+  if (OTP === user.OTP) {
+    let user = await updateUserById(userId, { verify: "Active" });
+    return true;
+  } else {
+    throw new Error("OTP is incorrect");
+  }
+}
 module.exports = {
   updateRequestBody,
   createUser,
@@ -130,4 +139,5 @@ module.exports = {
   updateUserById,
   deleteUserById,
   userAuthentication,
+  userEmailVerification,
 };

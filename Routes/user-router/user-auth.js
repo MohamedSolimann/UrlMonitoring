@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { userAuthentication } = require("../../Models/user-model/index");
+const {
+  userAuthentication,
+  userEmailVerification,
+} = require("../../Models/user-model/index");
 const {
   signinValidation,
   catchValidationErrors,
@@ -30,28 +33,15 @@ router.post("/verify/:id", async (req, res) => {
   const { OTP } = req.body;
   const userId = req.params.id;
   try {
-    let user = await userModel.findOne({ _id: userId }).lean();
-    if (user) {
-      if (OTP === user.OTP) {
-        let user = await userModel.findOneAndUpdate(
-          { _id: userId },
-          { $set: { verify: "Active" } },
-          {
-            new: true,
-          }
-        );
-        res.status(201).json({ message: "Success", data: user });
-      } else {
-        res.status(400).json({ message: "OTP is incorrect" });
-      }
-    } else {
-      res
-        .status(400)
-        .json({ message: "user id is incorrect ,Please try again" });
+    const emailVerified = await userEmailVerification(userId, OTP);
+    if (emailVerified) {
+      res.status(201).json({ message: "Success" });
     }
   } catch (error) {
     if (error.kind === "ObjectId") {
       res.status(400).json({ message: "Please check the user id" });
+    } else if (error.message) {
+      res.status(400).json({ message: "Error", error: error.message });
     } else {
       res.status(500).json({ message: "Error", error });
     }
