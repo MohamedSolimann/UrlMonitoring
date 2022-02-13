@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { createUser, getUserByEmail } = require("../../Models/user-model/index");
+const {
+  createUser,
+  getUserByEmail,
+  getUsers,
+  getUserById,
+} = require("../../Models/user-model/index");
 const { updateRequestBody } = require("../../Models/user-model/index");
 const {
   signupValidation,
@@ -19,33 +24,24 @@ router.post("/", signupValidation, catchValidationErrors, async (req, res) => {
 });
 router.get("/", userAuthentication, async (req, res) => {
   try {
-    let users = await userModel.find({ deletedDate: null });
-    if (users.length !== 0) {
-      res.status(200).json({ message: "Success", data: users });
-    } else {
-      res.status(200).json({ message: "There is no Users!" });
-    }
+    const users = await getUsers();
+    res.status(200).json({ message: "Success", data: users });
   } catch (error) {
-    res.status(500).json({ message: "Error", error });
+    res.status(500).json({ message: "Error", error: error.message });
   }
 });
-router.get("/:id", userAuthentication, async (req, res) => {
-  const userId = req.params.id;
+router.get("/:id", async (req, res) => {
   try {
-    let user = await userModel.findOne({ _id: userId }).lean();
+    let user = await getUserById(req.params.id);
     if (user) {
-      if (user.deletedDate) {
-        res.status(400).json({ message: "User no longer exists!" });
-      } else {
-        delete user.password;
-        res.status(200).json({ message: "Success", data: user });
-      }
-    } else {
-      res.status(400).json({ message: "Please check the user id" });
+      delete user.password;
+      res.status(200).json({ message: "Success", data: user });
     }
   } catch (error) {
     if (error.kind === "ObjectId") {
       res.status(400).json({ message: "Please check the user id" });
+    } else if (error.message) {
+      res.status(400).json({ message: "Error", error: error.message });
     } else {
       res.status(500).json({ message: "Error", error });
     }

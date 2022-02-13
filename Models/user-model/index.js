@@ -36,6 +36,26 @@ function updateUserForCreation(user) {
   user.OTP = OTP;
   return user;
 }
+async function getUsers() {
+  const users = await userModel.find({ deletedDate: null }).lean();
+  if (users) {
+    return users;
+  } else {
+    throw new Error("No users found!");
+  }
+}
+async function getUserById(userId) {
+  try {
+    const user = await userModel.findOne({ _id: userId }).lean();
+    if (user) {
+      return user;
+    } else if (user === null) {
+      throw new Error("No user found!");
+    }
+  } catch (error) {
+    throw error;
+  }
+}
 function updateRequestBody(req) {
   let updatedBody = {};
   if (req.body.username) {
@@ -50,4 +70,10 @@ function updateRequestBody(req) {
   return updatedBody;
 }
 
-module.exports = { updateRequestBody, createUser, getUserByEmail };
+module.exports = {
+  updateRequestBody,
+  createUser,
+  getUserByEmail,
+  getUsers,
+  getUserById,
+};
