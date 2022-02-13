@@ -19,7 +19,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use("/users", userRouter);
-app.use("/users/auth", userAuthRouter);
+app.use("/userauth", userAuthRouter);
 app.use("/checks", checkRouter);
 app.use("/reports", reportRouter);
 mongoose.connect(

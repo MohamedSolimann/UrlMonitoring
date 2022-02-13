@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const bycrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const userModel = require("../../Models/user-model/user.schema");
+const { userAuthentication } = require("../../Models/user-model/index");
 const {
   signinValidation,
   catchValidationErrors,
@@ -15,29 +13,16 @@ router.post(
   async (req, res) => {
     const { email, password } = req.body;
     try {
-      let user = await userModel.findOne({ email });
-      if (user) {
-        if (user.verify === "Active") {
-          let verifyPassword = bycrypt.compareSync(password, user.password);
-          if (verifyPassword) {
-            const token = jwt.sign({ id: user._id }, "secret");
-            res.cookie("Token", token);
-            res.status(200).json({ message: "Success" });
-          } else {
-            res
-              .status(400)
-              .json({ message: "Password is incorrect ,Please try again" });
-          }
-        } else {
-          res.status(200).json({ message: "Please verify your email" });
-        }
-      } else {
-        res
-          .status(400)
-          .json({ message: "Email is incorrect ,Please try again" });
-      }
+      const token = await userAuthentication(email, password);
+      res.cookie("token", token);
+      res.status(201).json({ message: "Success" });
     } catch (error) {
-      res.status(500).json({ message: "Error" });
+      if (error.message) {
+        res.status(400).json({ message: "Error", error: error.message });
+      } else {
+        p;
+        res.status(500).json({ message: "Error" });
+      }
     }
   }
 );

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const userModel = require("./user.schema");
+const jwt = require("jsonwebtoken");
 const sendEmail = require("../../verify/email-verification");
 
 async function createUser(user) {
@@ -23,9 +24,7 @@ async function createUser(user) {
 }
 async function getUserByEmail(email) {
   let user = await userModel.findOne({ email });
-  if (user) {
-    throw new Error("Email is already in use");
-  }
+  return user;
 }
 function updateUserForCreation(user) {
   let OTP = Math.floor(Math.random() * 9000 + 1000);
@@ -104,6 +103,24 @@ function updateRequestBody(body) {
   return updatedBody;
 }
 
+async function userAuthentication(email, password) {
+  const user = await getUserByEmail(email);
+  if (user) {
+    if (user.verify === "Active") {
+      let verifyPassword = bcrypt.compareSync(password, user.password);
+      if (verifyPassword) {
+        const token = jwt.sign({ id: user._id }, "secret");
+        return token;
+      } else {
+        throw new Error("Password is incorrect ,Please try again");
+      }
+    } else {
+      throw new Error("Please verify your email");
+    }
+  } else {
+    throw new Error("Email is not associated with any account");
+  }
+}
 module.exports = {
   updateRequestBody,
   createUser,
@@ -112,4 +129,5 @@ module.exports = {
   getUserById,
   updateUserById,
   deleteUserById,
+  userAuthentication,
 };

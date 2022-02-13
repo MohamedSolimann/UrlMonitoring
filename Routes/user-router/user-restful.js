@@ -16,7 +16,10 @@ const { userAuthentication } = require("../user-router/index");
 
 router.post("/", signupValidation, catchValidationErrors, async (req, res) => {
   try {
-    await getUserByEmail(req.body.email);
+    const user = await getUserByEmail(req.body.email);
+    if (user) {
+      res.status(400).json({ message: "Email already exists" });
+    }
     const newUser = createUser(req.body);
     res.status(201).json({ message: "Success", data: newUser });
   } catch (error) {
@@ -48,7 +51,7 @@ router.get("/:id", userAuthentication, async (req, res) => {
     }
   }
 });
-router.put("/:id", userAuthentication, async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const updatedUser = await updateUserById(req.params.id, req.body);
     res.status(201).json({ message: "Success", data: updatedUser });
