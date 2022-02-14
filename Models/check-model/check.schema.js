@@ -45,7 +45,11 @@ var checkSchema = new mongoose.Schema({
     required: true,
     enum: ["Paused", "Active"],
   },
-  deletedDate: { type: Date },
+  deletedAt: { type: Date },
+  createdAt: {
+    type: Date,
+    required: true,
+  },
 });
 
 //Export the model

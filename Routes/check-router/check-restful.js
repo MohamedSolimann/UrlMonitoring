@@ -5,25 +5,35 @@ const {
   catchValidationErrors,
 } = require("../../validation/check.validation");
 const { userAuthentication } = require("../user-router/index");
-const { createCheck } = require("../../Models/check-model/index");
+const {
+  createCheck,
+  getCheckById,
+  getChecks,
+} = require("../../Models/check-model/index");
 const URLMonitoring = require("../monitor/axios");
 
-router.post("/", checkCreation, catchValidationErrors, async (req, res) => {
-  try {
-    const newCheck = await createCheck(req.body);
-    // URLMonitoring(url, webhook, newCheck._id, interval, timeout);
-    res.status(201).json({ message: "Success", data: newCheck });
-  } catch (error) {
-    if (error.message) {
-      res.status(400).json({ message: "Invalid Info!" });
-    } else {
-      res.status(500).json({ message: "Error", error });
+router.post(
+  "/",
+  checkCreation,
+  userAuthentication,
+  catchValidationErrors,
+  async (req, res) => {
+    try {
+      const newCheck = await createCheck(req.body);
+      // URLMonitoring(url, webhook, newCheck._id, interval, timeout);
+      res.status(201).json({ message: "Success", data: newCheck });
+    } catch (error) {
+      if (error.message) {
+        res.status(400).json({ message: "Invalid Info!" });
+      } else {
+        res.status(500).json({ message: "Error", error });
+      }
     }
   }
-});
-router.get("/", userAuthentication, async (req, res) => {
+);
+router.get("/", async (req, res) => {
   try {
-    let checks = await checkModel.find({ deletedDate: null });
+    const checks = await getChecks();
     if (checks.length !== 0) {
       res.status(200).json({ message: "Success", data: checks });
     } else {
@@ -36,19 +46,11 @@ router.get("/", userAuthentication, async (req, res) => {
 router.get("/:id", async (req, res) => {
   const checkId = req.params.id;
   try {
-    let check = await checkModel.findOne({ _id: checkId }).lean();
-    if (check) {
-      if (check.deletedDate) {
-        res.status(400).json({ message: "check no longer exists!" });
-      } else {
-        res.status(200).json({ message: "Success", data: check });
-      }
-    } else {
-      res.status(400).json({ message: "Please check the check id" });
-    }
+    const check = await getCheckById(checkId);
+    res.status(200).json({ message: "Success", data: check });
   } catch (error) {
-    if (error.kind === "ObjectId") {
-      res.status(400).json({ message: "Please check the check id" });
+    if (error.message) {
+      res.status(400).json({ error: error.message });
     } else {
       res.status(500).json({ message: "Error", error });
     }

@@ -11,9 +11,25 @@ async function createCheck(check) {
     throw error;
   }
 }
-
+async function getCheckById(checkId) {
+  const check = await checkModel.findOne({ _id: checkId });
+  if (check) {
+    return check;
+  } else {
+    throw new Error("Check not found!");
+  }
+}
+async function getChecks() {
+  try {
+    const checks = await checkModel.find({ deletedAt: null });
+    return checks;
+  } catch (error) {
+    throw error;
+  }
+}
 function updateCheckForCreation(check) {
   check._id = mongoose.Types.ObjectId();
+  check.ceratedAt = new Date();
   return check;
 }
 function updateRequestBody(req) {
@@ -48,4 +64,4 @@ function updateRequestBody(req) {
   return updatedBody;
 }
 
-module.exports = { updateRequestBody, createCheck };
+module.exports = { updateRequestBody, createCheck, getCheckById, getChecks };
