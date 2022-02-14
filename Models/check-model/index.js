@@ -41,6 +41,18 @@ async function updatedCheckById(checkId, body) {
     throw error;
   }
 }
+async function deletedCheck(checkId) {
+  const check = await getCheckById(checkId);
+  try {
+    let deletedCheck = await checkModel.findOneAndUpdate(
+      { _id: checkId },
+      { $set: { deletedAt: Date(), status: "Paused" } }
+    );
+    return deletedCheck;
+  } catch (error) {
+    throw error;
+  }
+}
 function updateCheckForCreation(check) {
   check._id = mongoose.Types.ObjectId();
   check.createdAt = new Date();
@@ -90,4 +102,5 @@ module.exports = {
   getCheckById,
   getChecks,
   updatedCheckById,
+  deletedCheck,
 };

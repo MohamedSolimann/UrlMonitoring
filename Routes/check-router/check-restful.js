@@ -10,6 +10,7 @@ const {
   getCheckById,
   getChecks,
   updatedCheckById,
+  deletedCheck,
 } = require("../../Models/check-model/index");
 const URLMonitoring = require("../monitor/axios");
 
@@ -73,17 +74,11 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", userAuthentication, async (req, res) => {
   let checkId = req.params.id;
   try {
-    let check = await checkModel.findOne({ _id: checkId });
-    if (check) {
-      let deletedCheck = await checkModel.findOneAndUpdate(
-        { _id: checkId },
-        { $set: { deletedDate: Date(), status: "Paused" } }
-      );
-    }
+    const deletedCheck = await deletedCheck(checkId);
     res.status(202).json({ message: "Success" });
   } catch (error) {
-    if (error.kind === "ObjectId") {
-      res.status(400).json({ message: "Please check the check id" });
+    if (error.message) {
+      res.status(400).json({ error: error.message });
     } else {
       res.status(500).json({ message: "Error", error });
     }
