@@ -10,13 +10,13 @@ async function createUser(user) {
     let newUser = new userModel(udaptedUser);
     await newUser.save();
     if (newUser) {
-      sendEmail({
-        to: user.email,
-        from: "ahmdsolmn@gmail.com",
-        subject: "Email Verification",
-        text: "Email Verification",
-        html: `<body><p> Email Verification : ${updatedUser.OTP}</p></body>`,
-      });
+      // sendEmail({
+      //   to: user.email,
+      //   from: "ahmdsolmn@gmail.com",
+      //   subject: "Email Verification",
+      //   text: "Email Verification",
+      //   html: `<body><p> Email Verification : ${udaptedUser.OTP}</p></body>`,
+      // });
     }
   } catch (error) {
     throw error;

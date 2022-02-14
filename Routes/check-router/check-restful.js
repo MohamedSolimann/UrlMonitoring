@@ -1,61 +1,26 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
-const checkModel = require("../../Models/check-model/check.schema");
-const { updateRequestBody } = require("../../Models/check-model/index");
 const {
   checkCreation,
   catchValidationErrors,
 } = require("../../validation/check.validation");
 const { userAuthentication } = require("../user-router/index");
+const { createCheck } = require("../../Models/check-model/index");
 const URLMonitoring = require("../monitor/axios");
 
-router.post(
-  "/",
-  userAuthentication,
-  checkCreation,
-  catchValidationErrors,
-  async (req, res) => {
-    const {
-      checkname,
-      url,
-      protocol,
-      path,
-      port,
-      webhook,
-      tag,
-      status,
-      timeout,
-      interval,
-      user_id,
-    } = req.body;
-    try {
-      let newCheck = new checkModel({
-        _id: mongoose.Types.ObjectId(),
-        user_id,
-        checkname,
-        url,
-        protocol,
-        path,
-        port,
-        webhook,
-        tag,
-        status,
-        timeout,
-        interval,
-      });
-      await newCheck.save();
-      URLMonitoring(url, webhook, newCheck._id, interval, timeout);
-      res.status(201).json({ message: "Success", data: newCheck });
-    } catch (error) {
-      if (error.message) {
-        res.status(400).json({ message: "Invalid Info!" });
-      } else {
-        res.status(500).json({ message: "Error", error });
-      }
+router.post("/", checkCreation, catchValidationErrors, async (req, res) => {
+  try {
+    const newCheck = await createCheck(req.body);
+    // URLMonitoring(url, webhook, newCheck._id, interval, timeout);
+    res.status(201).json({ message: "Success", data: newCheck });
+  } catch (error) {
+    if (error.message) {
+      res.status(400).json({ message: "Invalid Info!" });
+    } else {
+      res.status(500).json({ message: "Error", error });
     }
   }
-);
+});
 router.get("/", userAuthentication, async (req, res) => {
   try {
     let checks = await checkModel.find({ deletedDate: null });

@@ -1,3 +1,21 @@
+const mongoose = require("mongoose");
+const checkModel = require("../../Models/check-model/check.schema");
+
+async function createCheck(check) {
+  try {
+    const updatedCheck = updateCheckForCreation(check);
+    let newCheck = new checkModel(updatedCheck);
+    await newCheck.save();
+    return newCheck;
+  } catch (error) {
+    throw error;
+  }
+}
+
+function updateCheckForCreation(check) {
+  check._id = mongoose.Types.ObjectId();
+  return check;
+}
 function updateRequestBody(req) {
   let updatedBody = {};
   if (req.body.checkname) {
@@ -30,4 +48,4 @@ function updateRequestBody(req) {
   return updatedBody;
 }
 
-module.exports = { updateRequestBody };
+module.exports = { updateRequestBody, createCheck };
