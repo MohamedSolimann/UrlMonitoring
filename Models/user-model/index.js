@@ -33,6 +33,7 @@ function updateUserForCreation(user) {
   user.password = encryptedPassword;
   user.verify = "Pending";
   user.OTP = OTP;
+  user.createdAt = new Date();
   return user;
 }
 async function getUsers() {

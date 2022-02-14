@@ -9,6 +9,7 @@ const {
   createCheck,
   getCheckById,
   getChecks,
+  updatedCheckById,
 } = require("../../Models/check-model/index");
 const URLMonitoring = require("../monitor/axios");
 
@@ -31,7 +32,7 @@ router.post(
     }
   }
 );
-router.get("/", async (req, res) => {
+router.get("/", userAuthentication, async (req, res) => {
   try {
     const checks = await getChecks();
     if (checks.length !== 0) {
@@ -43,7 +44,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Error", error });
   }
 });
-router.get("/:id", async (req, res) => {
+router.get("/:id", userAuthentication, async (req, res) => {
   const checkId = req.params.id;
   try {
     const check = await getCheckById(checkId);
@@ -56,21 +57,17 @@ router.get("/:id", async (req, res) => {
     }
   }
 });
-router.put("/:id", userAuthentication, async (req, res) => {
+router.put("/:id", async (req, res) => {
   let checkId = req.params.id;
   try {
-    let check = await checkModel.findOne({ _id: checkId });
-    if (check) {
-      let updatedBody = await updateRequestBody(req);
-      var updatedCheck = await checkModel.findOneAndUpdate(
-        { _id: check._id },
-        { $set: updatedBody },
-        { new: true }
-      );
-    }
+    var updatedCheck = await updatedCheckById(checkId, req.body);
     res.status(201).json({ message: "Success", data: updatedCheck });
   } catch (error) {
-    res.status(500).json({ message: "Error", error });
+    if (error.message) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ message: "Error", error });
+    }
   }
 });
 router.delete("/:id", userAuthentication, async (req, res) => {

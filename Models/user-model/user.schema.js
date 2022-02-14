@@ -21,6 +21,9 @@ var userSchema = new mongoose.Schema({
   deletedAt: {
     type: Date,
   },
+  createdAt: {
+    type: Date,
+  },
   verify: {
     type: String,
     enum: ["Pending", "Active"],

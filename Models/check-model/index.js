@@ -27,41 +27,67 @@ async function getChecks() {
     throw error;
   }
 }
+async function updatedCheckById(checkId, body) {
+  let check = await getCheckById(checkId);
+  try {
+    let updatedRequestBody = updateRequestBody(body);
+    let updatedCheck = await checkModel.findOneAndUpdate(
+      { _id: checkId },
+      { $set: updatedRequestBody },
+      { new: true }
+    );
+    return updatedCheck;
+  } catch (error) {
+    throw error;
+  }
+}
 function updateCheckForCreation(check) {
   check._id = mongoose.Types.ObjectId();
-  check.ceratedAt = new Date();
+  check.createdAt = new Date();
   return check;
 }
-function updateRequestBody(req) {
+function updateRequestBody(body) {
   let updatedBody = {};
-  if (req.body.checkname) {
-    updatedBody.checkname = req.body.checkname;
+  if (body.checkname) {
+    updatedBody.checkname = body.checkname;
   }
-  if (req.body.url) {
-    updatedBody.url = req.body.url;
+  if (body.url) {
+    updatedBody.url = body.url;
   }
-  if (req.body.protocol) {
-    updatedBody.protocol = req.body.protocol;
+  if (body.protocol) {
+    updatedBody.protocol = body.protocol;
   }
-  if (req.body.path) {
-    updatedBody.path = req.body.path;
+  if (body.path) {
+    updatedBody.path = body.path;
   }
-  if (req.body.webhook) {
-    updatedBody.webhook = req.body.webhook;
+  if (body.webhook) {
+    updatedBody.webhook = body.webhook;
   }
-  if (req.body.port) {
-    updatedBody.port = req.body.port;
+  if (body.port) {
+    updatedBody.port = body.port;
   }
-  if (req.body.status) {
-    updatedBody.status = req.body.status;
+  if (body.status) {
+    updatedBody.status = body.status;
   }
-  if (req.body.timeout) {
-    updatedBody.timeout = req.body.timeout;
+  if (body.timeout) {
+    updatedBody.timeout = body.timeout;
   }
-  if (req.body.interval) {
-    updatedBody.interval = req.body.interval;
+  if (body.interval) {
+    updatedBody.interval = body.interval;
+  }
+  if (body.deletedAt) {
+    updatedBody.deletedAt = body.deletedAt;
+  }
+  if (body.createdAt) {
+    updatedBody.createdAt = body.createdAt;
   }
   return updatedBody;
 }
 
-module.exports = { updateRequestBody, createCheck, getCheckById, getChecks };
+module.exports = {
+  updateRequestBody,
+  createCheck,
+  getCheckById,
+  getChecks,
+  updatedCheckById,
+};
