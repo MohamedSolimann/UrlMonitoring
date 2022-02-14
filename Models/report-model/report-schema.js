@@ -37,7 +37,10 @@ var reportSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  deletedDate: {
+  deletedAt: {
+    type: Date,
+  },
+  createdAt: {
     type: Date,
   },
 });
