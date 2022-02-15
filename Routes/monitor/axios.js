@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { createReport } = require("../report-router/index");
+const { createReport } = require("../../Models/report-model/index");
 const { getCheckStatus } = require("../check-router/index");
 const sendEmail = require("../../verify/email-verification");
 let totalNumberOfReq = 0;

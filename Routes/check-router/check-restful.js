@@ -13,12 +13,12 @@ const {
   deletedCheck,
 } = require("../../Models/check-model/index");
 const URLMonitoring = require("../monitor/axios");
+const { createCheckValidation, reqParamsValidation } = require("./middleware");
 
 router.post(
   "/",
-  checkCreation,
   userAuthentication,
-  catchValidationErrors,
+  createCheckValidation,
   async (req, res) => {
     try {
       const newCheck = await createCheck(req.body);
@@ -45,44 +45,59 @@ router.get("/", userAuthentication, async (req, res) => {
     res.status(500).json({ message: "Error", error });
   }
 });
-router.get("/:id", userAuthentication, async (req, res) => {
-  const checkId = req.params.id;
-  try {
-    const check = await getCheckById(checkId);
-    res.status(200).json({ message: "Success", data: check });
-  } catch (error) {
-    if (error.message) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(500).json({ message: "Error", error });
+router.get(
+  "/:id",
+  userAuthentication,
+  reqParamsValidation,
+  async (req, res) => {
+    const checkId = req.params.id;
+    try {
+      const check = await getCheckById(checkId);
+      res.status(200).json({ message: "Success", data: check });
+    } catch (error) {
+      if (error.message) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ message: "Error", error });
+      }
     }
   }
-});
-router.put("/:id", async (req, res) => {
-  let checkId = req.params.id;
-  try {
-    var updatedCheck = await updatedCheckById(checkId, req.body);
-    res.status(201).json({ message: "Success", data: updatedCheck });
-  } catch (error) {
-    if (error.message) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(500).json({ message: "Error", error });
+);
+router.put(
+  "/:id",
+  userAuthentication,
+  reqParamsValidation,
+  async (req, res) => {
+    let checkId = req.params.id;
+    try {
+      var updatedCheck = await updatedCheckById(checkId, req.body);
+      res.status(201).json({ message: "Success", data: updatedCheck });
+    } catch (error) {
+      if (error.message) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ message: "Error", error });
+      }
     }
   }
-});
-router.delete("/:id", userAuthentication, async (req, res) => {
-  let checkId = req.params.id;
-  try {
-    const deletedCheck = await deletedCheck(checkId);
-    res.status(202).json({ message: "Success" });
-  } catch (error) {
-    if (error.message) {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(500).json({ message: "Error", error });
+);
+router.delete(
+  "/:id",
+  userAuthentication,
+  reqParamsValidation,
+  async (req, res) => {
+    let checkId = req.params.id;
+    try {
+      const deletedCheck = await deletedCheck(checkId);
+      res.status(202).json({ message: "Success" });
+    } catch (error) {
+      if (error.message) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ message: "Error", error });
+      }
     }
   }
-});
+);
 
 module.exports = router;

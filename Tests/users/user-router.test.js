@@ -15,7 +15,6 @@ setupDB();
 const createEndpointTestCases = () => {
   it("Suppose to create new user", async () => {
     const response = await request.post("/users").send({
-      _id: mongoose.Types.ObjectId(),
       username: "mohamed",
       email: "a@a.com",
       password: "123123123",
@@ -199,9 +198,5 @@ const verifyEndpointTestCases = () => {
 };
 const restApiTestCases = () => {
   createEndpointTestCases();
-  readEndpointTestCases();
-  udpateEndpointTestCases();
-  deleteEndpointTestCases();
-  verifyEndpointTestCases();
 };
 describe("Testing Restful API for users", restApiTestCases);

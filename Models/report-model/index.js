@@ -25,4 +25,4 @@ function updatedReportForCreation(report) {
   return report;
 }
 
-module.exports = { updateRequestBody, createReport, getReportById };
+module.exports = { createReport, getReportById };
