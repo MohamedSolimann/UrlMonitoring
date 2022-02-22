@@ -1,14 +1,38 @@
 const Joi = require("joi");
 
-const userSchema = Joi.object().keys({
-  username: Joi.string().required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(8).required(),
-  verify: Joi.string().required().valid("Pending", "Active"),
-});
-
 function createUserkValidation(req, res, next) {
+  const userSchema = Joi.object().keys({
+    username: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).required(),
+    verify: Joi.string().required().valid("Pending", "Active"),
+  });
   const result = userSchema.validate(req.body);
+  if (result.error) {
+    res.status(400).json({ error: result.error.message });
+  } else {
+    next();
+  }
+}
+function signinValidation(req, res, next) {
+  const userSchema = Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.required(),
+  });
+
+  const result = userSchema.validate(req.body);
+  if (result.error) {
+    res.status(400).json({ error: result.error.message });
+  } else {
+    next();
+  }
+}
+function otpValidation(req, res, next) {
+  const result = Joi.object()
+    .keys({
+      OTP: Joi.number().min(5).max(5).required(),
+    })
+    .validate(req.params);
   if (result.error) {
     res.status(400).json({ error: result.error.message });
   } else {
@@ -27,4 +51,9 @@ function reqParamsValidation(req, res, next) {
     next();
   }
 }
-module.exports = { createUserkValidation, reqParamsValidation };
+module.exports = {
+  createUserkValidation,
+  signinValidation,
+  reqParamsValidation,
+  otpValidation,
+};

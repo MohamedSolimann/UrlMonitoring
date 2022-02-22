@@ -6,48 +6,49 @@ const {
 } = require("../../Models/user-model/index");
 const {
   signinValidation,
-  catchValidationErrors,
-} = require("../../validation/user.validation");
+  reqParamsValidation,
+  otpValidation,
+} = require("./middleware");
 
+router.post("/signin", signinValidation, async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const token = await userAuthentication(email, password);
+    res.cookie("token", token);
+    res.status(201).json({ message: "Success" });
+  } catch (error) {
+    if (error.message) {
+      res.status(400).json({ message: "Error", error: error.message });
+    } else {
+      p;
+      res.status(500).json({ message: "Error" });
+    }
+  }
+});
 router.post(
-  "/signin",
-  signinValidation,
-  catchValidationErrors,
+  "/verify/:id",
+  reqParamsValidation,
+  otpValidation,
   async (req, res) => {
-    const { email, password } = req.body;
+    const { OTP } = req.body;
+    const userId = req.params.id;
     try {
-      const token = await userAuthentication(email, password);
-      res.cookie("token", token);
-      res.status(201).json({ message: "Success" });
+      const emailVerified = await userEmailVerification(userId, OTP);
+      if (emailVerified) {
+        res.status(201).json({ message: "Success" });
+      }
     } catch (error) {
-      if (error.message) {
+      if (error.kind === "ObjectId") {
+        res.status(400).json({ message: "Please check the user id" });
+      } else if (error.message) {
         res.status(400).json({ message: "Error", error: error.message });
       } else {
-        p;
-        res.status(500).json({ message: "Error" });
+        res.status(500).json({ message: "Error", error });
       }
     }
   }
 );
-router.post("/verify/:id", async (req, res) => {
-  const { OTP } = req.body;
-  const userId = req.params.id;
-  try {
-    const emailVerified = await userEmailVerification(userId, OTP);
-    if (emailVerified) {
-      res.status(201).json({ message: "Success" });
-    }
-  } catch (error) {
-    if (error.kind === "ObjectId") {
-      res.status(400).json({ message: "Please check the user id" });
-    } else if (error.message) {
-      res.status(400).json({ message: "Error", error: error.message });
-    } else {
-      res.status(500).json({ message: "Error", error });
-    }
-  }
-});
-router.get("/signout", async (req, res) => {
+router.get("/signout", userAuthentication, async (req, res) => {
   try {
     res.clearCookie("Token");
     res.status(200).json({ message: "Success" });
