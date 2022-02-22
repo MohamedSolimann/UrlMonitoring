@@ -8,25 +8,31 @@ const {
   updateUserById,
   deleteUserById,
 } = require("../../Models/user-model/index");
-const {
-  signupValidation,
-  catchValidationErrors,
-} = require("../../validation/user.validation");
+const { createUserkValidation, reqParamsValidation } = require("./middleware");
 const { userAuthentication } = require("../user-router/index");
 
-router.post("/", signupValidation, catchValidationErrors, async (req, res) => {
-  try {
-    const user = await getUserByEmail(req.body.email);
-    if (user) {
-      res.status(400).json({ message: "Email already exists" });
+router.post(
+  "/",
+  userAuthentication,
+  createUserkValidation,
+  async (req, res) => {
+    try {
+      const user = await getUserByEmail(req.body.email);
+      if (user) {
+        throw "Email already exists";
+      }
+      const newUser = createUser(req.body);
+      res.status(201).json({ message: "Success", data: newUser });
+    } catch (error) {
+      if (error.message) {
+        res.status(400).json({ message: "Error", error: error.message });
+      } else {
+        res.status(500).json({ message: "Error", error: error.message });
+      }
     }
-    const newUser = createUser(req.body);
-    res.status(201).json({ message: "Success", data: newUser });
-  } catch (error) {
-    res.status(500).json({ message: "Error", error: error.message });
   }
-});
-router.get("/", userAuthentication, async (req, res) => {
+);
+router.get("/", async (req, res) => {
   try {
     const users = await getUsers();
     res.status(200).json({ message: "Success", data: users });
@@ -34,7 +40,7 @@ router.get("/", userAuthentication, async (req, res) => {
     res.status(500).json({ message: "Error", error: error.message });
   }
 });
-router.get("/:id", userAuthentication, async (req, res) => {
+router.get("/:id", reqParamsValidation, async (req, res) => {
   try {
     let user = await getUserById(req.params.id);
     if (user) {
@@ -51,33 +57,43 @@ router.get("/:id", userAuthentication, async (req, res) => {
     }
   }
 });
-router.put("/:id", async (req, res) => {
-  try {
-    const updatedUser = await updateUserById(req.params.id, req.body);
-    res.status(201).json({ message: "Success", data: updatedUser });
-  } catch (error) {
-    if (error.kind === "ObjectId") {
-      res.status(400).json({ message: "Please check the user id" });
-    } else if (error.message) {
-      res.status(400).json({ message: "Error", error: error.message });
-    } else {
-      res.status(500).json({ message: "Error", error });
+router.put(
+  "/:id",
+  userAuthentication,
+  reqParamsValidation,
+  async (req, res) => {
+    try {
+      const updatedUser = await updateUserById(req.params.id, req.body);
+      res.status(201).json({ message: "Success", data: updatedUser });
+    } catch (error) {
+      if (error.kind === "ObjectId") {
+        res.status(400).json({ message: "Please check the user id" });
+      } else if (error.message) {
+        res.status(400).json({ message: "Error", error: error.message });
+      } else {
+        res.status(500).json({ message: "Error", error });
+      }
     }
   }
-});
-router.delete("/:id", userAuthentication, async (req, res) => {
-  try {
-    let deletedUser = await deleteUserById(req.params.id);
-    res.status(202).json({ message: "Success" });
-  } catch (error) {
-    if (error.kind === "ObjectId") {
-      res.status(400).json({ message: "Please check the user id" });
-    } else if (error.message) {
-      res.status(400).json({ message: "Error", error: error.message });
-    } else {
-      res.status(500).json({ message: "Error", error });
+);
+router.delete(
+  "/:id",
+  userAuthentication,
+  reqParamsValidation,
+  async (req, res) => {
+    try {
+      let deletedUser = await deleteUserById(req.params.id);
+      res.status(202).json({ message: "Success" });
+    } catch (error) {
+      if (error.kind === "ObjectId") {
+        res.status(400).json({ message: "Please check the user id" });
+      } else if (error.message) {
+        res.status(400).json({ message: "Error", error: error.message });
+      } else {
+        res.status(500).json({ message: "Error", error });
+      }
     }
   }
-});
+);
 
 module.exports = router;

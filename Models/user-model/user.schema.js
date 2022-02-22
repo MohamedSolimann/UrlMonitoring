@@ -31,6 +31,7 @@ var userSchema = new mongoose.Schema({
   },
   OTP: {
     type: Number,
+    require: true,
   },
 });
 
