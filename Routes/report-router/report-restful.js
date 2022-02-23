@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { getReportById } = require("../../Models/report-model/index");
-const { userAuthentication } = require("../user-router/index");
+const { userAuthentication } = require("../user-router/middleware");
 
 router.get("/:id", userAuthentication, async (req, res) => {
   const reportId = req.params.id;

@@ -9,7 +9,7 @@ const {
   deleteUserById,
 } = require("../../Models/user-model/index");
 const { createUserkValidation, reqParamsValidation } = require("./middleware");
-const { userAuthentication } = require("../user-router/index");
+const { userAuthentication } = require("../user-router/middleware");
 
 router.post(
   "/",

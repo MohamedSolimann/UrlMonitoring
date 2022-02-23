@@ -4,7 +4,7 @@ const {
   checkCreation,
   catchValidationErrors,
 } = require("../../validation/check.validation");
-const { userAuthentication } = require("../user-router/index");
+const { userAuthentication } = require("../user-router/middleware");
 const {
   createCheck,
   getCheckById,
